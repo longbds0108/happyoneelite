@@ -364,6 +364,25 @@
   .zoom-close{position:absolute;top:-14px;right:-14px;width:42px;height:42px;border-radius:50%;border:0;background:var(--gold-400);color:var(--green-900);font-size:1.6rem;line-height:1;cursor:pointer}
   @media (max-width:560px){ .sec-no::before{font-size:1.8rem} }
   @media (prefers-reduced-motion:reduce){ *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important} }
+
+  /* ===== Popup nhận bảng giá ===== */
+  dialog#lead-popup{position:fixed;inset:0;margin:auto;border:0;padding:0;background:transparent;width:min(440px,calc(100% - 32px));max-width:none;max-height:calc(100% - 32px)}
+  dialog#lead-popup::backdrop{background:rgba(7,30,22,.72)}
+  .lp-card{position:relative;background:#fff;border-radius:22px;padding:1.8rem 1.6rem 1.6rem;color:var(--ink);box-shadow:0 30px 60px rgba(0,0,0,.35)}
+  .lp-close{position:absolute;top:12px;right:12px;width:38px;height:38px;border-radius:50%;border:0;background:#f1ece0;color:var(--green-800);font-size:1.5rem;line-height:1;cursor:pointer}
+  .lp-eyebrow{font-size:.8rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-500);font-weight:600}
+  .lp-card h3{font-size:1.6rem;color:var(--green-800);font-weight:700;line-height:1.2;margin:.3rem 0 .4rem}
+  .lp-sub{color:var(--muted);font-size:.95rem;margin-bottom:1.2rem}
+  .lp-form{display:flex;flex-direction:column;gap:.75rem}
+  .lp-form .btn{width:100%}
+  .lp-card .ct-field input,.lp-card .ct-field select{background:#fbf9f4;box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
+  .lp-card .ct-field select{color:var(--muted)}
+  .lp-card .ct-field select:valid{color:var(--ink)}
+  .lp-card .ct-msg{color:var(--green-700)}
+  @media (max-width:560px){
+    dialog#lead-popup{inset:auto 0 0 0;margin:0;width:100%;max-height:92vh}
+    .lp-card{border-radius:22px 22px 0 0;padding:1.6rem 1.2rem 1.4rem}
+  }
 </style>
 </head>
 <body>
@@ -679,6 +698,33 @@
 
 <dialog id="zoom" aria-label="Xem phóng to"><img alt="" id="zoom-img"><button type="button" class="zoom-close" aria-label="Đóng">×</button></dialog>
 
+<dialog id="lead-popup" aria-labelledby="lp-title">
+  <div class="lp-card">
+    <button type="button" class="lp-close" aria-label="Đóng">×</button>
+    <p class="lp-eyebrow">Happy One Elite</p>
+    <h3 id="lp-title">Nhận bảng giá chi tiết</h3>
+    <p class="lp-sub">Để lại thông tin, chuyên viên sẽ liên hệ và gửi bảng giá cho Anh/Chị.</p>
+    <form class="lp-form" id="lp-form">
+      <div class="ct-field"><svg class="ico" viewBox="0 0 24 24"><use href="#i-user"/></svg><input type="text" name="name" placeholder="Họ và tên *" aria-label="Họ và tên" autocomplete="name" required></div>
+      <div class="ct-field"><svg class="ico" viewBox="0 0 24 24"><use href="#i-phone"/></svg><input type="tel" name="phone" placeholder="Số điện thoại *" aria-label="Số điện thoại" autocomplete="tel" inputmode="tel" required pattern="[0-9+ ]{9,15}"></div>
+      <div class="ct-field select-wrap"><svg class="ico" viewBox="0 0 24 24"><use href="#i-building"/></svg>
+        <select name="type" aria-label="Loại căn quan tâm" required>
+          <option value="" disabled selected>Loại căn quan tâm *</option>
+          <option>1BR</option>
+          <option>1BR+</option>
+          <option>2BR</option>
+          <option>2BR+</option>
+          <option>2BR Garden / Space Villa</option>
+          <option>Officetel</option>
+          <option>Thương mại dịch vụ</option>
+        </select>
+      </div>
+      <button class="btn" type="submit">Nhận bảng giá →</button>
+      <p class="ct-msg" id="lp-msg" style="display:none">Cảm ơn Anh/Chị! Chuyên viên sẽ liên hệ sớm nhất.</p>
+    </form>
+  </div>
+</dialog>
+
 <script>
   document.documentElement.classList.add('js');
 
@@ -788,6 +834,26 @@
     img.addEventListener('click', () => { zimg.src = img.src; zimg.alt = img.alt; zoom.showModal(); });
   });
   zoom.addEventListener('click', e => { if (e.target === zoom || e.target.classList.contains('zoom-close')) zoom.close(); });
+
+  // Popup nhận bảng giá: hiện sau 8 giây, chỉ hiện một lần cho mỗi trình duyệt
+  const lp = document.getElementById('lead-popup');
+  const LP_KEY = 'hoe-lead-popup-seen';
+  const markSeen = () => { try { localStorage.setItem(LP_KEY, '1'); } catch (err) {} };
+  let alreadySeen = false;
+  try { alreadySeen = localStorage.getItem(LP_KEY) === '1'; } catch (err) {}
+  if (!alreadySeen) {
+    setTimeout(() => { if (!lp.open && !zoom.open) lp.showModal(); }, 8000);
+  }
+  lp.addEventListener('close', markSeen);
+  lp.addEventListener('click', e => { if (e.target === lp || e.target.classList.contains('lp-close')) lp.close(); });
+  document.getElementById('lp-form').addEventListener('submit', e => {
+    e.preventDefault();
+    console.log('Lead popup:', Object.fromEntries(new FormData(e.target)));
+    document.getElementById('lp-msg').style.display = 'block';
+    e.target.reset();
+    markSeen();
+    setTimeout(() => lp.close(), 2500);
+  });
 </script>
 </body>
 </html>
