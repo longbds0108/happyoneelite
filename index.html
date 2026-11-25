@@ -835,14 +835,14 @@
   });
   zoom.addEventListener('click', e => { if (e.target === zoom || e.target.classList.contains('zoom-close')) zoom.close(); });
 
-  // Popup nhận bảng giá: hiện sau 8 giây, chỉ hiện một lần cho mỗi trình duyệt
+  // Popup nhận bảng giá: hiện sau 4 giây, chỉ hiện một lần cho mỗi trình duyệt
   const lp = document.getElementById('lead-popup');
   const LP_KEY = 'hoe-lead-popup-seen';
   const markSeen = () => { try { localStorage.setItem(LP_KEY, '1'); } catch (err) {} };
   let alreadySeen = false;
   try { alreadySeen = localStorage.getItem(LP_KEY) === '1'; } catch (err) {}
   if (!alreadySeen) {
-    setTimeout(() => { if (!lp.open && !zoom.open) lp.showModal(); }, 8000);
+    setTimeout(() => { if (!lp.open && !zoom.open) lp.showModal(); }, 4000);
   }
   lp.addEventListener('close', markSeen);
   lp.addEventListener('click', e => { if (e.target === lp || e.target.classList.contains('lp-close')) lp.close(); });
