@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Happy One Elite | Live Above, Live Elite</title>
 <meta name="description" content="Happy One Elite - Căn hộ cao cấp tại lõi đô thị Thủ Đức, TP.HCM. Chủ đầu tư Vạn Xuân Group.">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="images/favicon-512.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<meta name="theme-color" content="#0b2e22">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -799,14 +803,6 @@
   }, { threshold: .12 });
   document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 
-  // Form (chưa có backend: chỉ hiển thị thông báo, thay bằng fetch tới API của bạn)
-  document.getElementById('lead-form').addEventListener('submit', e => {
-    e.preventDefault();
-    const data = Object.fromEntries(new FormData(e.target));
-    console.log('Lead:', data);
-    document.getElementById('form-msg').style.display = 'block';
-    e.target.reset();
-  });
 
   // Đếm số liệu khi hiện ra
   const fmt = (v, dec) => dec
@@ -846,13 +842,55 @@
   }
   lp.addEventListener('close', markSeen);
   lp.addEventListener('click', e => { if (e.target === lp || e.target.classList.contains('lp-close')) lp.close(); });
-  document.getElementById('lp-form').addEventListener('submit', e => {
+  // Gửi form về email qua Formspree. Thay REPLACE_WITH_FORM_ID bằng mã form của bạn (xem hướng dẫn).
+  const FORM_ENDPOINT = 'https://formspree.io/f/REPLACE_WITH_FORM_ID';
+  const sendLead = async form => {
+    const data = new FormData(form);
+    data.append('_subject', 'Khách mới từ website Happy One Elite');
+    const res = await fetch(FORM_ENDPOINT, { method: 'POST', body: data, headers: { Accept: 'application/json' } });
+    if (!res.ok) throw new Error('Formspree trả về lỗi ' + res.status);
+  };
+  const SEND_FAIL = 'Gửi chưa thành công. Vui lòng gọi 0936 032 577 để được tư vấn.';
+
+  // Form liên hệ
+  document.getElementById('lead-form').addEventListener('submit', async e => {
     e.preventDefault();
-    console.log('Lead popup:', Object.fromEntries(new FormData(e.target)));
-    document.getElementById('lp-msg').style.display = 'block';
-    e.target.reset();
-    markSeen();
-    setTimeout(() => lp.close(), 2500);
+    const f = e.target, msg = document.getElementById('form-msg');
+    const btn = document.querySelector('button[form="lead-form"]');
+    btn.disabled = true;
+    try {
+      await sendLead(f);
+      msg.textContent = 'Cảm ơn Anh/Chị! Chuyên viên sẽ liên hệ sớm nhất.';
+      f.reset();
+    } catch (err) {
+      console.error(err);
+      msg.textContent = SEND_FAIL;
+    } finally {
+      btn.disabled = false;
+      msg.style.display = 'block';
+    }
+  });
+
+  // Form trong popup
+  document.getElementById('lp-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const f = e.target, msg = document.getElementById('lp-msg');
+    const btn = f.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    try {
+      await sendLead(f);
+      msg.textContent = 'Cảm ơn Anh/Chị! Chuyên viên sẽ liên hệ sớm nhất.';
+      msg.style.display = 'block';
+      f.reset();
+      markSeen();
+      setTimeout(() => lp.close(), 2500);
+    } catch (err) {
+      console.error(err);
+      msg.textContent = SEND_FAIL;
+      msg.style.display = 'block';
+    } finally {
+      btn.disabled = false;
+    }
   });
 </script>
 </body>
