@@ -842,8 +842,8 @@
   }
   lp.addEventListener('close', markSeen);
   lp.addEventListener('click', e => { if (e.target === lp || e.target.classList.contains('lp-close')) lp.close(); });
-  // Gửi form về email qua Formspree. Thay REPLACE_WITH_FORM_ID bằng mã form của bạn (xem hướng dẫn).
-  const FORM_ENDPOINT = 'https://formspree.io/f/REPLACE_WITH_FORM_ID';
+  // Gửi form về email inmindrealty@gmail.com qua Formspree (form mvkaldjd).
+  const FORM_ENDPOINT = 'https://formspree.io/f/mvkaldjd';
   const sendLead = async form => {
     const data = new FormData(form);
     data.append('_subject', 'Khách mới từ website Happy One Elite');
